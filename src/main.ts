@@ -369,12 +369,12 @@ export default class JellyfinPlugin extends Plugin {
         // Use default order if settings are missing keys (e.g. migration)
         const order = this.settings.frontmatterOrder || DEFAULT_SETTINGS.frontmatterOrder;
 
-        // IMPORTANT: 'poster' is async, so we need to await everything?
-        // Actually only poster is async.
         for (const key of order) {
             const generator = generators[key];
             if (generator) {
                 await generator();
+            } else if (this.settings.customFields && this.settings.customFields.includes(key)) {
+                fmLines.push(`${key}: `);
             }
         }
 
@@ -396,12 +396,9 @@ export default class JellyfinPlugin extends Plugin {
     }
 
     slugify(text: string): string {
-        return text.toString().toLowerCase()
+        return text.toString()
             .replace(/\s+/g, '_')           // Replace spaces with -
-            .replace(/[^\w-]+/g, '')       // Remove all non-word chars
-            .replace(/--+/g, '_')         // Replace multiple - with single -
-            .replace(/^-+/, '')             // Trim - from start of text
-            .replace(/-+$/, '');            // Trim - from end of text
+            .replace(/[#,.\[\]:;"]/g, '');  // Remove invalid tag chars (keep letters, numbers, unicode)
     }
 
     getPeopleByType(people: any[], type: string): string {

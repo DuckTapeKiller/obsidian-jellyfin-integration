@@ -80,7 +80,8 @@ var DEFAULT_SETTINGS = {
     "tmdb_id",
     "watched",
     "poster"
-  ]
+  ],
+  customFields: []
 };
 var JellyfinSettingTab = class extends import_obsidian.PluginSettingTab {
   constructor(app, plugin) {
@@ -129,6 +130,21 @@ var JellyfinSettingTab = class extends import_obsidian.PluginSettingTab {
     containerEl.createEl("div", { text: "Drag and drop items to reorder the Frontmatter fields.", cls: "setting-item-description" });
     containerEl.createEl("h4", { text: "Frontmatter Keys & Order" });
     containerEl.createEl("div", { text: "Drag items to reorder. User toggles to include/exclude.", cls: "setting-item-description" });
+    new import_obsidian.Setting(containerEl).setName("Add Custom Field").setDesc('Add a new frontmatter key (e.g. "My Rating"). It will be added with an empty value.').addText((text) => text.setPlaceholder("Field Name").onChange((value) => {
+      text.inputEl.dataset.value = value;
+    })).addButton((btn) => btn.setButtonText("Add").onClick(async () => {
+      const inputEl = containerEl.querySelector('input[placeholder="Field Name"]');
+      const value = inputEl == null ? void 0 : inputEl.value.trim();
+      if (value && !this.plugin.settings.customFields.includes(value) && !this.plugin.settings.frontmatterOrder.includes(value)) {
+        this.plugin.settings.customFields.push(value);
+        this.plugin.settings.frontmatterOrder.push(value);
+        await this.plugin.saveSettings();
+        inputEl.value = "";
+        this.display();
+      } else {
+        new import_obsidian.Notice("Invalid or duplicate field name.");
+      }
+    }));
     const fmContainer = containerEl.createDiv();
     this.renderFrontmatterSettings(fmContainer);
     containerEl.createEl("h4", { text: "Poster Management" });
@@ -266,6 +282,16 @@ var JellyfinSettingTab = class extends import_obsidian.PluginSettingTab {
             this.plugin.settings.keyWatched = v;
             await this.plugin.saveSettings();
           }));
+          break;
+        default:
+          if (this.plugin.settings.customFields.includes(key)) {
+            setting = new import_obsidian.Setting(container).setName(key).setDesc("Custom Field").addButton((btn) => btn.setIcon("trash").setTooltip("Delete Field").onClick(async () => {
+              this.plugin.settings.customFields = this.plugin.settings.customFields.filter((f) => f !== key);
+              this.plugin.settings.frontmatterOrder = this.plugin.settings.frontmatterOrder.filter((f) => f !== key);
+              await this.plugin.saveSettings();
+              this.renderFrontmatterSettings(container);
+            }));
+          }
           break;
       }
       if (setting) {
@@ -959,6 +985,8 @@ var JellyfinPlugin = class extends import_obsidian5.Plugin {
       const generator = generators[key];
       if (generator) {
         await generator();
+      } else if (this.settings.customFields && this.settings.customFields.includes(key)) {
+        fmLines.push(`${key}: `);
       }
     }
     fmLines.push(`---`);
@@ -975,7 +1003,7 @@ var JellyfinPlugin = class extends import_obsidian5.Plugin {
     }
   }
   slugify(text) {
-    return text.toString().toLowerCase().replace(/\s+/g, "_").replace(/[^\w-]+/g, "").replace(/--+/g, "_").replace(/^-+/, "").replace(/-+$/, "");
+    return text.toString().replace(/\s+/g, "_").replace(/[#,.\[\]:;"]/g, "");
   }
   getPeopleByType(people, type) {
     if (!people)

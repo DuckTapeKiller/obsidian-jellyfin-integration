@@ -44,6 +44,8 @@ export interface JellyfinPluginSettings {
 
     // Order
     frontmatterOrder: string[];
+    // Custom Fields
+    customFields: string[];
 }
 
 export const DEFAULT_SETTINGS: JellyfinPluginSettings = {
@@ -85,6 +87,7 @@ export const DEFAULT_SETTINGS: JellyfinPluginSettings = {
         'rating_parental', 'tags', 'plot', 'year', 'tmdb_id',
         'watched', 'poster'
     ],
+    customFields: [],
 }
 
 export class JellyfinSettingTab extends PluginSettingTab {
@@ -194,6 +197,37 @@ export class JellyfinSettingTab extends PluginSettingTab {
 
         containerEl.createEl('h4', { text: 'Frontmatter Keys & Order' });
         containerEl.createEl('div', { text: 'Drag items to reorder. User toggles to include/exclude.', cls: 'setting-item-description' });
+
+        // Custom Field Adder
+        new Setting(containerEl)
+            .setName('Add Custom Field')
+            .setDesc('Add a new frontmatter key (e.g. "My Rating"). It will be added with an empty value.')
+            .addText(text => text
+                .setPlaceholder('Field Name')
+                .onChange((value) => {
+                    // We could store it temporarily
+                    text.inputEl.dataset.value = value;
+                }))
+            .addButton(btn => btn
+                .setButtonText('Add')
+                .onClick(async () => {
+                    // Logic to add
+                    const inputEl = containerEl.querySelector('input[placeholder="Field Name"]') as HTMLInputElement;
+                    const value = inputEl?.value.trim();
+
+                    if (value && !this.plugin.settings.customFields.includes(value) && !this.plugin.settings.frontmatterOrder.includes(value)) {
+                        this.plugin.settings.customFields.push(value);
+                        this.plugin.settings.frontmatterOrder.push(value); // Add to end of order
+                        await this.plugin.saveSettings();
+
+                        // Clear input
+                        inputEl.value = '';
+                        this.display(); // Refresh to show in list
+                    } else {
+                        new Notice('Invalid or duplicate field name.');
+                    }
+                }));
+
 
         const fmContainer = containerEl.createDiv();
         this.renderFrontmatterSettings(fmContainer);
@@ -328,6 +362,24 @@ export class JellyfinSettingTab extends PluginSettingTab {
                         .setDesc('Add a checkbox property to track if watched.')
                         .addToggle(toggle => toggle.setValue(this.plugin.settings.includeWatched).onChange(async v => { this.plugin.settings.includeWatched = v; await this.plugin.saveSettings(); }))
                         .addText(t => t.setValue(this.plugin.settings.keyWatched).onChange(async v => { this.plugin.settings.keyWatched = v; await this.plugin.saveSettings(); }));
+                    break;
+                default:
+                    // Check if it is a Custom Field
+                    if (this.plugin.settings.customFields.includes(key)) {
+                        setting = new Setting(container)
+                            .setName(key)
+                            .setDesc('Custom Field')
+                            .addButton(btn => btn
+                                .setIcon('trash')
+                                .setTooltip('Delete Field')
+                                .onClick(async () => {
+                                    // Delete Logic
+                                    this.plugin.settings.customFields = this.plugin.settings.customFields.filter(f => f !== key);
+                                    this.plugin.settings.frontmatterOrder = this.plugin.settings.frontmatterOrder.filter(f => f !== key);
+                                    await this.plugin.saveSettings();
+                                    this.renderFrontmatterSettings(container);
+                                }));
+                    }
                     break;
             }
 
