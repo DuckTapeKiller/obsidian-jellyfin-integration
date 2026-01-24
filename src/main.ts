@@ -272,26 +272,23 @@ export default class JellyfinPlugin extends Plugin {
             'title': () => { fmLines.push(`${this.settings.keyTitle}: ${cleanTitle}`); },
 
             'original_title': () => {
-                if (this.settings.includeOriginalTitle) fmLines.push(`${this.settings.keyOriginalTitle}: ${movie.OriginalTitle || ''}`);
+                if (this.settings.includeOriginalTitle) fmLines.push(`${this.settings.keyOriginalTitle}: ${this.safeValue(movie.OriginalTitle || '')}`);
             },
 
             'genre': () => {
-                if (this.settings.includeGenre) fmLines.push(`${this.settings.keyGenre}: ${genres.join(', ')}`);
+                if (this.settings.includeGenre) fmLines.push(`${this.settings.keyGenre}: ${genres.map((g: string) => this.safeValue(g)).join(', ')}`);
             },
 
             'director': () => {
-                // Director and Cast are often grouped in UI, but split in keys. 
-                // If user wants to separate them, this allows it.
-                // Note: includeCast toggles BOTH currently.
-                if (this.settings.includeCast) fmLines.push(`${this.settings.keyDirector}: ${this.getPeopleByType(movie.People, 'Director')}`);
+                if (this.settings.includeCast) fmLines.push(`${this.settings.keyDirector}: ${this.safeValue(this.getPeopleByType(movie.People, 'Director'))}`);
             },
 
             'cast': () => {
-                if (this.settings.includeCast) fmLines.push(`${this.settings.keyCast}: ${this.getPeopleByType(movie.People, 'Actor')}`);
+                if (this.settings.includeCast) fmLines.push(`${this.settings.keyCast}: ${this.safeValue(this.getPeopleByType(movie.People, 'Actor'))}`);
             },
 
             'production_locations': () => {
-                if (this.settings.includeProductionLocations) fmLines.push(`${this.settings.keyProductionLocations}: ${movie.ProductionLocations ? movie.ProductionLocations.join(', ') : ''}`);
+                if (this.settings.includeProductionLocations) fmLines.push(`${this.settings.keyProductionLocations}: ${this.safeValue(movie.ProductionLocations ? movie.ProductionLocations.join(', ') : '')}`);
             },
 
             'rating_community': () => {
@@ -320,7 +317,7 @@ export default class JellyfinPlugin extends Plugin {
 
             'rating_parental': () => {
                 if (movie.OfficialRating) {
-                    fmLines.push(`${this.settings.keyParentalRating}: ${movie.OfficialRating}`);
+                    fmLines.push(`${this.settings.keyParentalRating}: ${this.safeValue(movie.OfficialRating)}`);
                 }
             },
 
@@ -396,9 +393,17 @@ export default class JellyfinPlugin extends Plugin {
     }
 
     slugify(text: string): string {
-        return text.toString()
+        return text.toString().toLowerCase()
             .replace(/\s+/g, '_')           // Replace spaces with -
             .replace(/[#,.\[\]:;"]/g, '');  // Remove invalid tag chars (keep letters, numbers, unicode)
+    }
+
+    // Helper to sanitize Metadata text (remove colons, quotes) to prevent YAML breakage
+    safeValue(text: string): string {
+        if (!text) return '';
+        return text.toString()
+            .replace(/:/g, ' —')   // Replace colons with em-dash
+            .replace(/"/g, "'");   // Replace double quotes with single quotes
     }
 
     getPeopleByType(people: any[], type: string): string {

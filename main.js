@@ -896,23 +896,23 @@ var JellyfinPlugin = class extends import_obsidian5.Plugin {
       },
       "original_title": () => {
         if (this.settings.includeOriginalTitle)
-          fmLines.push(`${this.settings.keyOriginalTitle}: ${movie.OriginalTitle || ""}`);
+          fmLines.push(`${this.settings.keyOriginalTitle}: ${this.safeValue(movie.OriginalTitle || "")}`);
       },
       "genre": () => {
         if (this.settings.includeGenre)
-          fmLines.push(`${this.settings.keyGenre}: ${genres.join(", ")}`);
+          fmLines.push(`${this.settings.keyGenre}: ${genres.map((g) => this.safeValue(g)).join(", ")}`);
       },
       "director": () => {
         if (this.settings.includeCast)
-          fmLines.push(`${this.settings.keyDirector}: ${this.getPeopleByType(movie.People, "Director")}`);
+          fmLines.push(`${this.settings.keyDirector}: ${this.safeValue(this.getPeopleByType(movie.People, "Director"))}`);
       },
       "cast": () => {
         if (this.settings.includeCast)
-          fmLines.push(`${this.settings.keyCast}: ${this.getPeopleByType(movie.People, "Actor")}`);
+          fmLines.push(`${this.settings.keyCast}: ${this.safeValue(this.getPeopleByType(movie.People, "Actor"))}`);
       },
       "production_locations": () => {
         if (this.settings.includeProductionLocations)
-          fmLines.push(`${this.settings.keyProductionLocations}: ${movie.ProductionLocations ? movie.ProductionLocations.join(", ") : ""}`);
+          fmLines.push(`${this.settings.keyProductionLocations}: ${this.safeValue(movie.ProductionLocations ? movie.ProductionLocations.join(", ") : "")}`);
       },
       "rating_community": () => {
         if (this.settings.includeRating) {
@@ -938,7 +938,7 @@ var JellyfinPlugin = class extends import_obsidian5.Plugin {
       },
       "rating_parental": () => {
         if (movie.OfficialRating) {
-          fmLines.push(`${this.settings.keyParentalRating}: ${movie.OfficialRating}`);
+          fmLines.push(`${this.settings.keyParentalRating}: ${this.safeValue(movie.OfficialRating)}`);
         }
       },
       "tags": () => {
@@ -1003,7 +1003,13 @@ var JellyfinPlugin = class extends import_obsidian5.Plugin {
     }
   }
   slugify(text) {
-    return text.toString().replace(/\s+/g, "_").replace(/[#,.\[\]:;"]/g, "");
+    return text.toString().toLowerCase().replace(/\s+/g, "_").replace(/[#,.\[\]:;"]/g, "");
+  }
+  // Helper to sanitize Metadata text (remove colons, quotes) to prevent YAML breakage
+  safeValue(text) {
+    if (!text)
+      return "";
+    return text.toString().replace(/:/g, " \u2014").replace(/"/g, "'");
   }
   getPeopleByType(people, type) {
     if (!people)
