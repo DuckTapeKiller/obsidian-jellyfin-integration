@@ -1,8 +1,12 @@
-# Obsidian Jellyfin Integration
+![jellyfin](screenshots/pixel_art_jellyfin_integration.png)
 
 This plugin integrates your **Jellyfin** media server with **Obsidian**, allowing you to browse your movie library directly within Obsidian and create rich Markdown notes for your movies.
 
 It is designed to be highly customizable, letting you control exactly what metadata is imported, how it is named, and how images are handled.
+
+
+https://github.com/user-attachments/assets/001bd861-e9ac-4dc7-bd27-241ce925e94b
+
 
 ---
 
@@ -89,6 +93,11 @@ For each field, you have three controls:
     *   Use the **Breadcrumbs** at the top to go back.
 4.  **Click on a Movie Card**.
 5.  A new note will be created in your defined **Output Folder** with all the metadata you've configured.
+
+## IMPORTANT:
+**IF YOU HAVE A LARGE FILM COLLECTION, IT IS NORMAL THAT WHEN CLICKING ON THE FOLDER CONTAINING YOUR MOVIES, THE PLUGIN TAKES A WHILE TO DISPLAY THE INFORMATION.**
+
+
 
 ---
 
