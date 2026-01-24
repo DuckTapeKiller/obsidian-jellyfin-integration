@@ -1,0 +1,37 @@
+name: Release Plugin
+
+on:
+  push:
+    tags:
+      - "*" # Triggers on any tag push (e.g., 1.0.0)
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build # Ensures main.js and styles.css are compiled
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          files: |
+            main.js
+            styles.css
+            manifest.json
+          draft: false
+          prerelease: false
