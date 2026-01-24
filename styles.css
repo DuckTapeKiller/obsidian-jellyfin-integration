@@ -1,0 +1,136 @@
+/* Jellyfin Integration Styles */
+
+/* Browser Modal */
+.jellyfin-browser-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.jellyfin-browser-header {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid var(--background-modifier-border);
+    gap: 10px;
+}
+
+.jellyfin-breadcrumbs {
+    flex-grow: 1;
+    font-size: 1.1em;
+    font-weight: bold;
+}
+
+.jellyfin-browser-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--grid-columns, 4), minmax(0, 1fr));
+    gap: 15px;
+    padding: 15px;
+    overflow-y: auto;
+    max-height: 60vh;
+}
+
+.jellyfin-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.2s;
+    border-radius: var(--radius-m);
+    background-color: var(--background-primary);
+    padding: 10px;
+    text-align: center;
+    position: relative;
+    border: 1px solid var(--background-modifier-border);
+    /* Contain absolute children (checkbox) */
+}
+
+.jellyfin-card:hover {
+    transform: scale(1.05);
+    background-color: var(--background-secondary-alt);
+    border-color: var(--interactive-accent);
+}
+
+.jellyfin-poster {
+    width: 100%;
+    aspect-ratio: 2/3;
+    object-fit: cover;
+    border-radius: var(--radius-m);
+    margin-bottom: 8px;
+    background-color: var(--background-modifier-form-field);
+}
+
+.jellyfin-folder-icon {
+    width: 100%;
+    aspect-ratio: 1;
+    /* Folders often square-ish icon */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 3em;
+    color: var(--text-accent);
+    background-color: var(--background-modifier-form-field);
+    border-radius: var(--radius-m);
+    margin-bottom: 8px;
+}
+
+.jellyfin-card-title {
+    font-size: 0.9em;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+/* Table styles */
+.jellyfin-table-wrapper {
+    overflow-x: auto;
+    margin: 1em 0;
+}
+
+/* Fix for selection visibility */
+.jellyfin-card.is-selected {
+    border-color: var(--interactive-accent);
+    border-width: 2px;
+    border-style: solid;
+    background-color: var(--background-secondary-alt);
+}
+
+.jellyfin-card-checkbox {
+    /* Position only */
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    z-index: 10;
+}
+
+/* styling removed */
+
+
+/* Improve header layout for Close button */
+.modal-close-button {
+    /* Ensure no stray checkbox here - user reported issue */
+    /* Often close button is added by Obsidian Modal class. 
+       If user saw a checkbox there, maybe our header was overlapping? */
+    z-index: 20;
+}
+
+/* Safeguard: Hide any input inside the close button or header that shouldn't be there */
+.modal-close-button input {
+    display: none;
+}
+
+/* --- Tag Styling (Smaller Nested Tags) --- */
+/* Reading View */
+.markdown-preview-view .tag,
+.markdown-rendered .tag {
+    font-size: 0.85em;
+    /* Adjust to user preference */
+}
+
+/* Editing View (Live Preview / Source) */
+.cm-s-obsidian .cm-hashtag {
+    font-size: 0.85em;
+}
