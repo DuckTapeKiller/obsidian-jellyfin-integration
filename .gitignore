@@ -1,0 +1,16 @@
+# Obsidian Jellyfin Integration
+.DS_Store
+.idea/
+.vscode/
+node_modules/
+.obsidian/
+
+# Build Artifacts (Comment out if you want to commit built files)
+# main.js
+# styles.css (if using SCSS/PostCSS)
+
+# Coverage
+coverage/
+
+# Misc
+*.log
