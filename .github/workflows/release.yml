@@ -5,6 +5,9 @@ on:
     tags:
       - "*" # Triggers on any tag push (e.g., 1.0.0)
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
