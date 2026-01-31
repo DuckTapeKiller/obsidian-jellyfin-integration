@@ -288,7 +288,11 @@ export default class JellyfinPlugin extends Plugin {
             },
 
             'production_locations': () => {
-                if (this.settings.includeProductionLocations) fmLines.push(`${this.settings.keyProductionLocations}: ${this.safeValue(movie.ProductionLocations ? movie.ProductionLocations.join(', ') : '')}`);
+                if (this.settings.includeProductionLocations) {
+                    const locs = movie.ProductionLocations || [];
+                    const cleanLocs = locs.filter((l: string) => l && l.trim().length > 0).join(', ');
+                    fmLines.push(`${this.settings.keyProductionLocations}: ${this.safeValue(cleanLocs)}`);
+                }
             },
 
             'rating_community': () => {
@@ -323,8 +327,8 @@ export default class JellyfinPlugin extends Plugin {
 
             'tags': () => {
                 if (this.settings.includeTags && tagsList.length > 0) {
-                    const tagsString = tagsList.join(', ');
-                    fmLines.push(`tags: [${tagsString}]`);
+                    fmLines.push(`tags:`);
+                    tagsList.forEach(tag => fmLines.push(`  - ${tag}`));
                 }
             },
 
@@ -354,7 +358,7 @@ export default class JellyfinPlugin extends Plugin {
                     const posterUrl = `${this.settings.serverUrl}/Items/${movie.Id}/Images/Primary`;
                     if (this.settings.downloadPoster) {
                         const localPosterPath = await this.downloadPosterImage(movie, posterUrl);
-                        fmLines.push(`Poster: ${localPosterPath || posterUrl}`);
+                        fmLines.push(`Poster: "[[${localPosterPath}]]"`);
                     } else {
                         fmLines.push(`Poster: ${posterUrl}`);
                     }
@@ -395,7 +399,7 @@ export default class JellyfinPlugin extends Plugin {
     slugify(text: string): string {
         return text.toString().toLowerCase()
             .replace(/\s+/g, '_')           // Replace spaces with -
-            .replace(/[#,.\[\]:;"]/g, '');  // Remove invalid tag chars (keep letters, numbers, unicode)
+            .replace(/[#,.\[\]:;"']/g, '');  // Remove invalid tag chars (keep letters, numbers, unicode)
     }
 
     // Helper to sanitize Metadata text (remove colons, quotes) to prevent YAML breakage

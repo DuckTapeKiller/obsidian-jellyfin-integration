@@ -911,8 +911,11 @@ var JellyfinPlugin = class extends import_obsidian5.Plugin {
           fmLines.push(`${this.settings.keyCast}: ${this.safeValue(this.getPeopleByType(movie.People, "Actor"))}`);
       },
       "production_locations": () => {
-        if (this.settings.includeProductionLocations)
-          fmLines.push(`${this.settings.keyProductionLocations}: ${this.safeValue(movie.ProductionLocations ? movie.ProductionLocations.join(", ") : "")}`);
+        if (this.settings.includeProductionLocations) {
+          const locs = movie.ProductionLocations || [];
+          const cleanLocs = locs.filter((l) => l && l.trim().length > 0).join(", ");
+          fmLines.push(`${this.settings.keyProductionLocations}: ${this.safeValue(cleanLocs)}`);
+        }
       },
       "rating_community": () => {
         if (this.settings.includeRating) {
@@ -943,8 +946,8 @@ var JellyfinPlugin = class extends import_obsidian5.Plugin {
       },
       "tags": () => {
         if (this.settings.includeTags && tagsList.length > 0) {
-          const tagsString = tagsList.join(", ");
-          fmLines.push(`tags: [${tagsString}]`);
+          fmLines.push(`tags:`);
+          tagsList.forEach((tag) => fmLines.push(`  - ${tag}`));
         }
       },
       "plot": () => {
@@ -973,7 +976,7 @@ var JellyfinPlugin = class extends import_obsidian5.Plugin {
           const posterUrl = `${this.settings.serverUrl}/Items/${movie.Id}/Images/Primary`;
           if (this.settings.downloadPoster) {
             const localPosterPath = await this.downloadPosterImage(movie, posterUrl);
-            fmLines.push(`Poster: ${localPosterPath || posterUrl}`);
+            fmLines.push(`Poster: "[[${localPosterPath}]]"`);
           } else {
             fmLines.push(`Poster: ${posterUrl}`);
           }
@@ -1003,7 +1006,7 @@ var JellyfinPlugin = class extends import_obsidian5.Plugin {
     }
   }
   slugify(text) {
-    return text.toString().toLowerCase().replace(/\s+/g, "_").replace(/[#,.\[\]:;"]/g, "");
+    return text.toString().toLowerCase().replace(/\s+/g, "_").replace(/[#,.\[\]:;"']/g, "");
   }
   // Helper to sanitize Metadata text (remove colons, quotes) to prevent YAML breakage
   safeValue(text) {
